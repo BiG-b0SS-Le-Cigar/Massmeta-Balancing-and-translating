@@ -732,129 +732,129 @@
 #define UPDATE_EYES_RIGHT 2
 
 /obj/item/organ/eyes/robotic/glow
-	name = "high luminosity eyes"
-	desc = "Special glowing eyes, used by snowflakes who want to be special."
-	icon_state = "eyes_cyber_glow"
-	iris_overlay = "eyes_cyber_glow_iris"
-	eye_color_left = "#19191a"
-	eye_color_right = "#19191a"
-	actions_types = list(/datum/action/item_action/organ_action/use, /datum/action/item_action/organ_action/toggle)
-	var/max_light_beam_distance = 5
-	var/obj/item/flashlight/eyelight/glow/eye
-	/// base icon state for eye overlays
-	var/base_eye_state = "eyes_glow_gs"
-	/// Whether or not to match the eye color to the light or use a custom selection
-	var/eye_color_mode = USE_CUSTOM_COLOR
-	/// The selected color for the light beam itself
-	var/light_color_string = "#ffffff"
-	/// The custom selected eye color for the left eye. Defaults to the mob's natural eye color
-	var/left_eye_color_string
-	/// The custom selected eye color for the right eye. Defaults to the mob's natural eye color
-	var/right_eye_color_string
+        name = "high luminosity eyes"
+        desc = "Special glowing eyes, used by snowflakes who want to be special."
+        icon_state = "eyes_cyber_glow"
+        iris_overlay = "eyes_cyber_glow_iris"
+        eye_color_left = "#19191a"
+        eye_color_right = "#19191a"
+        actions_types = list(/datum/action/item_action/organ_action/use, /datum/action/item_action/organ_action/toggle)
+        var/max_light_beam_distance = 5
+        var/obj/item/flashlight/eyelight/glow/eye
+        /// base icon state for eye overlays
+        var/base_eye_state = "eyes_glow_gs"
+        /// Whether or not to match the eye color to the light or use a custom selection
+        var/eye_color_mode = USE_CUSTOM_COLOR
+        /// The selected color for the light beam itself
+        var/light_color_string = "#ffffff"
+        /// The custom selected eye color for the left eye. Defaults to the mob's natural eye color
+        var/left_eye_color_string
+        /// The custom selected eye color for the right eye. Defaults to the mob's natural eye color
+        var/right_eye_color_string
 
 /obj/item/organ/eyes/robotic/glow/Initialize(mapload)
-	. = ..()
-	eye = new /obj/item/flashlight/eyelight/glow
+        . = ..()
+        eye = new /obj/item/flashlight/eyelight/glow
 
 /obj/item/organ/eyes/robotic/glow/Destroy()
-	. = ..()
-	deactivate(close_ui = TRUE)
-	QDEL_NULL(eye)
+        . = ..()
+        deactivate(close_ui = TRUE)
+        QDEL_NULL(eye)
 
 /obj/item/organ/eyes/robotic/glow/emp_act(severity)
-	. = ..()
-	if(!eye.light_on || . & EMP_PROTECT_SELF)
-		return
-	deactivate(close_ui = TRUE)
+        . = ..()
+        if(!eye.light_on || . & EMP_PROTECT_SELF)
+                return
+        deactivate(close_ui = TRUE)
 
 /// Set the initial color of the eyes on insert to be the mob's previous eye color.
 /obj/item/organ/eyes/robotic/glow/on_mob_insert(mob/living/carbon/eye_recipient, special = FALSE, movement_flags)
-	. = ..()
-	left_eye_color_string = eye_color_left
-	right_eye_color_string = eye_color_right
-	update_mob_eye_color(eye_recipient)
-	deactivate(close_ui = TRUE)
-	eye.forceMove(eye_recipient)
+        . = ..()
+        left_eye_color_string = eye_color_left
+        right_eye_color_string = eye_color_right
+        update_mob_eye_color(eye_recipient)
+        deactivate(close_ui = TRUE)
+        eye.forceMove(eye_recipient)
 
 /obj/item/organ/eyes/robotic/glow/on_mob_remove(mob/living/carbon/eye_owner)
-	deactivate(eye_owner, close_ui = TRUE)
-	if(!QDELETED(eye))
-		eye.forceMove(src)
-	return ..()
+        deactivate(eye_owner, close_ui = TRUE)
+        if(!QDELETED(eye))
+                eye.forceMove(src)
+        return ..()
 
 /obj/item/organ/eyes/robotic/glow/ui_state(mob/user)
-	return GLOB.default_state
+        return GLOB.default_state
 
 /obj/item/organ/eyes/robotic/glow/ui_status(mob/user, datum/ui_state/state)
-	if(!QDELETED(owner))
-		if(owner == user)
-			return min(
-				ui_status_user_is_abled(user, src),
-				ui_status_only_living(user),
-			)
-		else return UI_CLOSE
-	return ..()
+        if(!QDELETED(owner))
+                if(owner == user)
+                        return min(
+                                ui_status_user_is_abled(user, src),
+                                ui_status_only_living(user),
+                        )
+                else return UI_CLOSE
+        return ..()
 
 /obj/item/organ/eyes/robotic/glow/ui_interact(mob/user, datum/tgui/ui)
-	ui = SStgui.try_update_ui(user, src, ui)
-	if(!ui)
-		ui = new(user, src, "HighLuminosityEyesMenu")
-		ui.autoupdate = FALSE
-		ui.open()
+        ui = SStgui.try_update_ui(user, src, ui)
+        if(!ui)
+                ui = new(user, src, "HighLuminosityEyesMenu")
+                ui.autoupdate = FALSE
+                ui.open()
 
 /obj/item/organ/eyes/robotic/glow/ui_data(mob/user)
-	var/list/data = list()
+        var/list/data = list()
 
-	data["eyeColor"] = list(
-		mode = eye_color_mode,
-		hasOwner = owner ? TRUE : FALSE,
-		left = left_eye_color_string,
-		right = right_eye_color_string,
-	)
-	data["lightColor"] = light_color_string
-	data["range"] = eye.light_range
+        data["eyeColor"] = list(
+                mode = eye_color_mode,
+                hasOwner = owner ? TRUE : FALSE,
+                left = left_eye_color_string,
+                right = right_eye_color_string,
+        )
+        data["lightColor"] = light_color_string
+        data["range"] = eye.light_range
 
-	return data
+        return data
 
 /obj/item/organ/eyes/robotic/glow/ui_act(action, list/params, datum/tgui/ui)
-	. = ..()
-	if(.)
-		return
+        . = ..()
+        if(.)
+                return
 
-	switch(action)
-		if("set_range")
-			var/new_range = params["new_range"]
-			set_beam_range(new_range)
-			return TRUE
-		if("pick_color")
-			var/new_color = input(
-				usr,
-				"Choose eye color color:",
-				"High Luminosity Eyes Menu",
-				light_color_string
-			) as color|null
-			if(new_color)
-				var/to_update = params["to_update"]
-				set_beam_color(new_color, to_update)
-				return TRUE
-		if("enter_color")
-			var/new_color = LOWER_TEXT(params["new_color"])
-			var/to_update = params["to_update"]
-			set_beam_color(new_color, to_update, sanitize = TRUE)
-			return TRUE
-		if("random_color")
-			var/to_update = params["to_update"]
-			randomize_color(to_update)
-			return TRUE
-		if("toggle_eye_color")
-			toggle_eye_color_mode()
-			return TRUE
+        switch(action)
+                if("set_range")
+                        var/new_range = params["new_range"]
+                        set_beam_range(new_range)
+                        return TRUE
+                if("pick_color")
+                        var/new_color = input(
+                                usr,
+                                "Choose eye color color:",
+                                "High Luminosity Eyes Menu",
+                                light_color_string
+                        ) as color|null
+                        if(new_color)
+                                var/to_update = params["to_update"]
+                                set_beam_color(new_color, to_update)
+                                return TRUE
+                if("enter_color")
+                        var/new_color = LOWER_TEXT(params["new_color"])
+                        var/to_update = params["to_update"]
+                        set_beam_color(new_color, to_update, sanitize = TRUE)
+                        return TRUE
+                if("random_color")
+                        var/to_update = params["to_update"]
+                        randomize_color(to_update)
+                        return TRUE
+                if("toggle_eye_color")
+                        toggle_eye_color_mode()
+                        return TRUE
 
 /obj/item/organ/eyes/robotic/glow/ui_action_click(mob/user, action)
-	if(istype(action, /datum/action/item_action/organ_action/toggle))
-		toggle_active()
-	else if(istype(action, /datum/action/item_action/organ_action/use))
-		ui_interact(user)
+        if(istype(action, /datum/action/item_action/organ_action/toggle))
+                toggle_active()
+        else if(istype(action, /datum/action/item_action/organ_action/use))
+                ui_interact(user)
 
 /**
  * Activates the light
@@ -862,11 +862,11 @@
  * Turns on the attached flashlight object, updates the mob overlay to be added.
  */
 /obj/item/organ/eyes/robotic/glow/proc/activate()
-	if(eye.light_range)
-		eye.set_light_on(TRUE)
-	else
-		eye.light_on = TRUE // at range 0 we are just going to make the eyes glow emissively, no light overlay
-	update_mob_eye_color()
+        if(eye.light_range)
+                eye.set_light_on(TRUE)
+        else
+                eye.light_on = TRUE // at range 0 we are just going to make the eyes glow emissively, no light overlay
+        update_mob_eye_color()
 
 /**
  * Deactivates the light
@@ -877,10 +877,10 @@
  * * close_ui - whether or not to close the ui
  */
 /obj/item/organ/eyes/robotic/glow/proc/deactivate(mob/living/carbon/eye_owner = owner, close_ui = FALSE)
-	if(close_ui)
-		SStgui.close_uis(src)
-	eye.set_light_on(FALSE)
-	update_mob_eye_color(eye_owner)
+        if(close_ui)
+                SStgui.close_uis(src)
+        eye.set_light_on(FALSE)
+        update_mob_eye_color(eye_owner)
 
 /**
  * Randomizes the light color
@@ -890,10 +890,10 @@
  * * to_update - whether we are setting the color for the light beam itself, or the individual eyes
  */
 /obj/item/organ/eyes/robotic/glow/proc/randomize_color(to_update = UPDATE_LIGHT)
-	var/new_color = "#"
-	for(var/i in 1 to 3)
-		new_color += num2hex(rand(0, 255), 2)
-	set_beam_color(new_color, to_update)
+        var/new_color = "#"
+        for(var/i in 1 to 3)
+                new_color += num2hex(rand(0, 255), 2)
+        set_beam_color(new_color, to_update)
 
 /**
  * Setter function for the light's range
@@ -904,11 +904,11 @@
  * * new_range - the new range to set
  */
 /obj/item/organ/eyes/robotic/glow/proc/set_beam_range(new_range)
-	var/old_light_range = eye.light_range
-	if(old_light_range == 0 && new_range > 0 && eye.light_on) // turn bring back the light overlay if we were previously at 0 (aka emissive eyes only)
-		eye.light_on = FALSE // this is stupid, but this has to be FALSE for set_light_on() to work.
-		eye.set_light_on(TRUE)
-	eye.set_light_range(clamp(new_range, 0, max_light_beam_distance))
+        var/old_light_range = eye.light_range
+        if(old_light_range == 0 && new_range > 0 && eye.light_on) // turn bring back the light overlay if we were previously at 0 (aka emissive eyes only)
+                eye.light_on = FALSE // this is stupid, but this has to be FALSE for set_light_on() to work.
+                eye.set_light_on(TRUE)
+        eye.set_light_range(clamp(new_range, 0, max_light_beam_distance))
 
 /**
  * Setter function for the light's color
@@ -920,30 +920,30 @@
  * * sanitize - whether the hex string should be sanitized
  */
 /obj/item/organ/eyes/robotic/glow/proc/set_beam_color(newcolor, to_update = UPDATE_LIGHT, sanitize = FALSE)
-	var/newcolor_string
-	if(sanitize)
-		newcolor_string = sanitize_hexcolor(newcolor)
-	else
-		newcolor_string = newcolor
-	switch(to_update)
-		if(UPDATE_LIGHT)
-			light_color_string = newcolor_string
-			eye.set_light_color(newcolor_string)
-		if(UPDATE_EYES_LEFT)
-			left_eye_color_string = newcolor_string
-		if(UPDATE_EYES_RIGHT)
-			right_eye_color_string = newcolor_string
+        var/newcolor_string
+        if(sanitize)
+                newcolor_string = sanitize_hexcolor(newcolor)
+        else
+                newcolor_string = newcolor
+        switch(to_update)
+                if(UPDATE_LIGHT)
+                        light_color_string = newcolor_string
+                        eye.set_light_color(newcolor_string)
+                if(UPDATE_EYES_LEFT)
+                        left_eye_color_string = newcolor_string
+                if(UPDATE_EYES_RIGHT)
+                        right_eye_color_string = newcolor_string
 
-	update_mob_eye_color()
+        update_mob_eye_color()
 
 /**
  * Toggle the attached flashlight object on or off
  */
 /obj/item/organ/eyes/robotic/glow/proc/toggle_active()
-	if(eye.light_on)
-		deactivate()
-	else
-		activate()
+        if(eye.light_on)
+                deactivate()
+        else
+                activate()
 
 /**
  * Toggles for the eye color mode
@@ -951,8 +951,8 @@
  * Toggles the eye color mode on or off and then calls an update on the mob's eye color
  */
 /obj/item/organ/eyes/robotic/glow/proc/toggle_eye_color_mode()
-	eye_color_mode = !eye_color_mode
-	update_mob_eye_color()
+        eye_color_mode = !eye_color_mode
+        update_mob_eye_color()
 
 /**
  * Updates the mob eye color
@@ -962,35 +962,36 @@
  * * mob/living/carbon/eye_owner - the mob to update the eye color appearance of
  */
 /obj/item/organ/eyes/robotic/glow/proc/update_mob_eye_color(mob/living/carbon/eye_owner = owner)
-	switch(eye_color_mode)
-		if(MATCH_LIGHT_COLOR)
-			eye_color_left = light_color_string
-			eye_color_right = light_color_string
-		if(USE_CUSTOM_COLOR)
-			eye_color_left = left_eye_color_string
-			eye_color_right = right_eye_color_string
+        switch(eye_color_mode)
+                if(MATCH_LIGHT_COLOR)
+                        eye_color_left = light_color_string
+                        eye_color_right = light_color_string
+                if(USE_CUSTOM_COLOR)
+                        eye_color_left = left_eye_color_string
+                        eye_color_right = right_eye_color_string
 
-	if(QDELETED(eye_owner) || !ishuman(eye_owner)) //Other carbon mobs don't have eye color.
-		return
+        if(QDELETED(eye_owner) || !ishuman(eye_owner)) //Other carbon mobs don't have eye color.
+                return
 
-	if(!eye.light_on)
-		eye_icon_state = initial(eye_icon_state)
-		overlay_ignore_lighting = FALSE
-	else
-		overlay_ignore_lighting = TRUE
-		eye_icon_state = base_eye_state
+        if(!eye.light_on)
+                eye_icon_state = initial(eye_icon_state)
+                overlay_ignore_lighting = FALSE
+        else
+                overlay_ignore_lighting = TRUE
+                eye_icon_state = base_eye_state
 
-	var/obj/item/bodypart/head/head = eye_owner.get_bodypart(BODY_ZONE_HEAD) //if we have eyes we definently have a head anyway
-	var/previous_flags = head.head_flags
-	head.head_flags = previous_flags | HEAD_EYECOLOR
-	eye_owner.dna.species.handle_body(eye_owner)
-	head.head_flags = previous_flags
+        var/obj/item/bodypart/head/head = eye_owner.get_bodypart(BODY_ZONE_HEAD) //if we have eyes we definently have a head anyway
+        var/previous_flags = head.head_flags
+        head.head_flags = previous_flags | HEAD_EYECOLOR
+        eye_owner.dna.species.handle_body(eye_owner)
+        head.head_flags = previous_flags
 
 #undef MATCH_LIGHT_COLOR
 #undef USE_CUSTOM_COLOR
 #undef UPDATE_LIGHT
 #undef UPDATE_EYES_LEFT
 #undef UPDATE_EYES_RIGHT
+		 
 
 /obj/item/organ/eyes/moth
 	name = "moth eyes"
